@@ -1,0 +1,62 @@
+from machine import Pin, ADC
+from motor import Motor
+import time
+
+motor_left = Motor("left", 8, 9, 6)
+motor_right = Motor("right", 10, 11, 7)
+R = ADC(Pin(26))  # Right Sensor
+M = ADC(Pin(27))  # Middle Sensor
+L = ADC(Pin(28))  # Left Sensor
+x0 = -15
+x1 = 0
+x2 = 15
+NR = 0
+NM = 0
+NL = 0
+
+while True:
+    NR = R.read_u16()
+    NM = M.read_u16()
+    NL = L.read_u16()
+    numerator = NR * x0 + NM * x1 + NL * x2
+    denominator = NR + NM + NL
+    line_dist = numerator / denominator
+    print("{:3d}, {:4d}, {:4d}, {:3.2f}".format(NR, NM, NL, line_dist))
+
+    if -0.1 <= line_dist <= 0.9 and 2000 < NM <= 10000000:
+        motor_right.control(1, 40)
+        motor_left.control(1, 40)
+    elif 0.9 < line_dist <= 3.4:
+        motor_right.control(1, 40)
+        motor_left.control(1, 50)
+    elif 3.4 < line_dist <= 5.9:
+        motor_right.control(1, 40)
+        motor_left.control(1, 55)
+    elif 5.9 < line_dist <= 8.4:
+        motor_right.control(1, 40)
+        motor_left.control(1, 60)
+    elif 8.4 < line_dist <= 10.9:
+        motor_right.control(1, 40)
+        motor_left.control(1, 80)
+    elif 10.9 < line_dist <= 13.4:
+        motor_right.control(1, 40)
+        motor_left.control(1, 90)
+    elif -0.1 > line_dist >= -0.6:
+        motor_right.control(1, 50)
+        motor_left.control(1, 40)
+    elif -1.1 > line_dist >= -1.6:
+        motor_right.control(1, 55)
+        motor_left.control(1, 40)
+    elif -1.6 > line_dist >= -2.1:
+        motor_right.control(1, 60)
+        motor_left.control(1, 40)
+    elif -2.1 > line_dist >= -2.7:
+        motor_right.control(1, 80)
+        motor_left.control(1, 40)
+    elif -2.7 > line_dist >= -3.1:
+        motor_right.control(1, 90)
+        motor_left.control(1, 40)
+    elif -1 <= line_dist <= 1 and 200 <= NM <= 2700:
+        time.sleep(0.000000001)
+        motor_right.control(1, 0)
+        motor_left.control(1, 0)
