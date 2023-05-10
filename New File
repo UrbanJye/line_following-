@@ -1,0 +1,88 @@
+from machine import Pin, ADC
+from motor import Motor
+from time import sleep
+
+motor_left = Motor("left", 8, 9, 6)
+motor_right = Motor("right", 10, 11, 7)
+R = ADC(Pin(26))  # Right Sensor
+M = ADC(Pin(27))  # Middle Sensor
+L = ADC(Pin(28))  # Left Sensor
+x0 = 15
+x1 = 0
+x2 = -14
+NR = 0
+NM = 0
+NL = 0
+while True:
+    NR = R.read_u16()
+    NM = M.read_u16()
+    NL = L.read_u16()
+    numerator = NR * x0 + NM * x1 + NL * x2
+    denominator = NR + NM + NL
+    line_dist = numerator / denominator
+    print("{:3d}, {:4d}, {:4d}, {:3.2f}".format(NR, NM, NL, line_dist))
+
+    if 0 <= line_dist <= 3 and 3300 < NM <= 10000000:
+        motor_right.control(1, 40)
+        motor_left.control(1, 40)
+        sleep(0.1)
+        print("Straight")
+        motor_right.control(1, 0)
+        motor_left.control(1, 0)
+        sleep(0.1)
+    elif -1.5 <= line_dist < 0:
+        motor_right.control(1, 60)
+        motor_left.control(1, 40)
+        sleep(0.1)
+        print("Turn Slightly Right")
+        motor_right.control(1, 0)
+        motor_left.control(1, 0)
+        sleep(0.1)
+    elif -5 <= line_dist < -1.5:
+        motor_right.control(1, 65)
+        motor_left.control(1, 40)
+        sleep(0.1)
+        print("Turn Right")
+        motor_right.control(1, 0)
+        motor_left.control(1, 0)
+        sleep(0.1)
+    elif -9 < line_dist < -5:
+        motor_right.control(1, 70)
+        motor_left.control(1, 40)
+        sleep(0.1)
+        print("Turn Hard Right")
+        motor_right.control(1, 0)
+        motor_left.control(1, 0)
+        sleep(0.1)
+    elif 5 >= line_dist > 3:
+        motor_right.control(1, 40)
+        motor_left.control(1, 60)
+        sleep(0.1)
+        print("Turn Slightly Left")
+        motor_right.control(1, 0)
+        motor_left.control(1, 0)
+        sleep(0.1)
+    elif 7.5 >= line_dist > 5:
+        motor_right.control(1, 40)
+        motor_left.control(1, 65)
+        sleep(0.1)
+        print("Turn Left")
+        motor_right.control(1, 0)
+        motor_left.control(1, 0)
+        sleep(0.1)
+    elif 13.4 >= line_dist > 7.5:
+        motor_right.control(1, 40)
+        motor_left.control(1, 70)
+        sleep(0.1)
+        print("Turn Hard Left")
+        motor_right.control(1, 0)
+        motor_left.control(1, 0)
+        sleep(0.1)
+    elif -1 <= line_dist <= 1 and 200 <= NM <= 2800:
+        motor_right.control(1, 0)
+        motor_left.control(1, 0)
+        sleep(0.1)
+        print("Stop")
+        motor_right.control(1, 0)
+        motor_left.control(1, 0)
+        sleep(0.1)
